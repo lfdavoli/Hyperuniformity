@@ -3,6 +3,7 @@
 #include <math.h>
 #include <random>
 #include <time.h> 
+#include <string>
 
 using namespace std;
 
@@ -62,7 +63,7 @@ Output-> Variance
 compute number of points inside given circle centered in x0
 sample 10000 x0
 */
-double variance(double R, vector<vector<double>> lattice)
+double compute_variance(double R, vector<vector<double>> lattice)
 {
     double sigma_sq;
     int L = lattice.size();
@@ -90,4 +91,29 @@ double variance(double R, vector<vector<double>> lattice)
     sigma_sq = N_sq/iterations - (N/iterations)*(N/iterations);
     
     return sigma_sq;
+}
+
+void get_variance_R(int lattice_size)
+{
+    vector<vector<double>> lattice = create_lattice(10);
+    double radii[200];
+    radii[0] = 0.01;
+    radii[199] = 200;
+    double c = exp(log(radii[199]/radii[0])/(200-1));
+    for (size_t i = 1; i < 200-1; i++)
+    {
+        radii[i] = radii[i-1]*c;
+    }
+
+    for (auto &&i : radii)
+    {
+        double sigma_sq;
+        string file_name = char(lattice_size) + "_" + char(radii) + ".csv"; 
+        ofstream output(file_name);
+
+        sigma_sq = compute_variance(i, lattice)/(i*i);
+
+    }
+    
+    
 }
