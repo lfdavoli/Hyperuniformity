@@ -1,7 +1,6 @@
 #include <fstream>
 #include <iostream>
-//#include "functions.cpp"
-#include "displacer.cpp"
+#include "functions.cpp"
 using namespace std;
 
 /*
@@ -14,6 +13,5 @@ int main()
 {
     srand(time(NULL));
     vector<vector<double>> lattice = create_lattice(L);    
-    
     return 0;
 }
