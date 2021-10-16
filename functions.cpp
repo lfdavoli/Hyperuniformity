@@ -4,6 +4,7 @@
 #include <random>
 #include <time.h> 
 #include <string>
+#include <chrono>
 
 using namespace std;
 
@@ -17,7 +18,7 @@ vector<vector<double>> create_lattice(int L)
     {
         vector<double> coords;
         coords.push_back(i%L);
-        coords.push_back(floor(i/L));
+        coords.push_back(i/L);
         points.push_back(coords);
     }
     return points;
@@ -66,7 +67,7 @@ sample 10000 x0
 double compute_variance(double R, vector<vector<double>> lattice)
 {
     double sigma_sq;
-    int L = lattice.size();
+    int L = sqrt(lattice.size());
 
     int iterations = 10000;
     int N = 0;
@@ -74,17 +75,20 @@ double compute_variance(double R, vector<vector<double>> lattice)
 
     for (size_t i = 0; i < iterations; i++)
     {
-        double X_x0 = ((double) rand() / (RAND_MAX)) * sqrt(L);
-        double Y_x0 = ((double) rand() / (RAND_MAX)) * sqrt(L);
+        double X_x0 = ((double) rand() / (RAND_MAX)) * L;
+        double Y_x0 = ((double) rand() / (RAND_MAX)) * L;
 
         int points_inside = 0;
-        for (size_t j = 0; i < L; i++)
+        cout<<"Variance "<<i<<endl;
+        for (size_t j = 0; j < L*L; j++)
         {
+            cout<<"Variance dentro "<<j<<endl;
             if(dist(X_x0, Y_x0, j, lattice) < R)
             {
                 points_inside ++;
             }
         }
+        cout<<"Variance uscito "<<i<<endl;
         N += points_inside;
         N_sq += points_inside*points_inside;
     }
@@ -95,25 +99,38 @@ double compute_variance(double R, vector<vector<double>> lattice)
 
 void get_variance_R(int lattice_size)
 {
-    vector<vector<double>> lattice = create_lattice(10);
+    auto start = chrono::high_resolution_clock::now();
+
+    vector<vector<double>> lattice = create_lattice(lattice_size);
+
+    auto stop = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<std::chrono::microseconds>(stop-start);
+    cout<<"Create_lattice: "<<duration.count()<<endl;
     double radii[200];
     radii[0] = 0.01;
-    radii[199] = 200;
+    radii[199] = lattice_size/2;
     double c = exp(log(radii[199]/radii[0])/(200-1));
     for (size_t i = 1; i < 200-1; i++)
     {
         radii[i] = radii[i-1]*c;
     }
 
+    string file_name = "dati.csv"; 
+    ofstream output(file_name);
+
     for (auto &&i : radii)
     {
         double sigma_sq;
-        string file_name = char(lattice_size) + "_" + char(radii) + ".csv"; 
-        ofstream output(file_name);
-
+        auto start = chrono::high_resolution_clock::now();
+        
         sigma_sq = compute_variance(i, lattice)/(i*i);
 
+        auto stop = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<std::chrono::microseconds>(stop-start);
+        cout<<"compute_variance: "<<duration.count()<<endl;
+
+        output<<i<<" "<<sigma_sq<<endl;
     }
-    
-    
+
+    output.close();
 }
