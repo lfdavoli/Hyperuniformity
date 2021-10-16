@@ -24,6 +24,7 @@ vector<vector<double>> create_lattice(int L)
     return points;
 }
 
+
 /*
 Compute distance between two points on lattice
 */
@@ -131,6 +132,20 @@ void get_variance_R(int lattice_size)
 
         output<<i<<" "<<sigma_sq<<endl;
     }
+    
+    
+}
 
-    output.close();
+
+/*
+Add [dx,dy] random displacement to each lattice site
+*/
+void AddDisplacement(vector<vector<double>> &lattice, double delta) {
+   int N = lattice.size();
+   for(int j = 0; j != N-1; j++) {
+      double dx = ( (double)rand() )/RAND_MAX  - delta/2;
+      double dy = ( (double)rand() )/RAND_MAX  - delta/2;
+      lattice[j] = vector<double>{dx+lattice[j][0],dy+lattice[j][1]};
+   }
+   return;
 }
