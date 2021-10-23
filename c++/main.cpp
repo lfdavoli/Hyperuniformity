@@ -4,7 +4,7 @@ using namespace std;
 /*
 Parameters
 */
-int L = 50;
+int L = 10;
 double delta = 1;
 
 int main()
