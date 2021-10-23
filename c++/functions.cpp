@@ -106,11 +106,11 @@ Output-> Variance
 
 Given x0 it computes N(R) and N(R)^2 for all radii
 */
-int* compute_N_r_x0(double X_x0, double Y_x0, vector<vector<double>> lattice)
+vector<int> compute_N_r_x0(double X_x0, double Y_x0, vector<vector<double>> lattice)
 {
     double sigma_sq;
     int L = sqrt(lattice.size());
-    int N_x0[200];
+    vector<int> N_x0;
     vector<double> distances;
 
     double radii[200];
@@ -130,8 +130,6 @@ int* compute_N_r_x0(double X_x0, double Y_x0, vector<vector<double>> lattice)
 
     sort(distances.begin(), distances.end());
 
-    int N = 0;
-    int N_sq = 0;
     int new_first = 0;
     int counter = 0;
     int points_inside;
@@ -148,8 +146,7 @@ int* compute_N_r_x0(double X_x0, double Y_x0, vector<vector<double>> lattice)
                 break;
             }
         }
-        N_x0[counter] = points_inside;
-        counter++;
+        N_x0.push_back(points_inside);
     }
     
     return N_x0;
@@ -182,7 +179,7 @@ void get_variance_R(int lattice_size)
         double sigma_sq;
         auto start = chrono::high_resolution_clock::now();
         
-        sigma_sq = compute_variance(i, lattice)/(i*i);
+        sigma_sq = compute_variance_R(i, lattice)/(i*i);
 
         auto stop = chrono::high_resolution_clock::now();
         auto duration = chrono::duration_cast<std::chrono::microseconds>(stop-start);
@@ -195,19 +192,47 @@ void get_variance_R(int lattice_size)
 void get_variance_x0(int lattice_size)
 {
     vector<vector<double>> lattice = create_lattice(lattice_size);
-    int *N_x0;
-    vector<double> variances;
+    vector<int> N_x0;
+    vector<double> N(200, 0);
+    vector<double> N_squared(200, 0);
+    double sigma;
+    int N_ITER = 10000;
+    char file_name = (char)lattice_size;
+    ofstream output(file_name + ".csv");
     
 
-    for (int i = 0; i < 10000; i++)
+    for (int i = 0; i < N_ITER; i++)
     {
         double X_x0 = ((double) rand() / (RAND_MAX)) * lattice_size;
         double Y_x0 = ((double) rand() / (RAND_MAX)) * lattice_size;
         N_x0 = compute_N_r_x0(X_x0, Y_x0, lattice);
-        variances
+        //cout<<N_x0.size()<<endl;
+        for (size_t i = 0; i < N_x0.size(); i++)
+        {
+            N[i] = (N[i] + N_x0[i]);
+            N_squared[i] = (N_squared[i] + N_x0[i]*N_x0[i]);
+        }
+    }
+
+    double radii[200];
+    radii[0] = 0.01;
+    radii[199] = lattice_size/2;
+    double c = exp(log(radii[199]/radii[0])/(200-1));
+    for (size_t i = 1; i < 200-1; i++)
+    {
+        radii[i] = radii[i-1]*c;
+    }
+    //cout<<N.size()<<endl;
+    for(int i = 0; i<N.size(); i++)
+    {
+        //cout<<radii[i]*radii[i]<<endl;
+        sigma = ((N_squared[i]/N_ITER) - (N[i]/N_ITER)*(N[i]/N_ITER))/(radii[i]*radii[i]);
+        output<<radii[i]<<" "<<sigma<<endl;
     }
     
 }
+
+
 /*
 Add [dx,dy] random displacement to each lattice site
 */

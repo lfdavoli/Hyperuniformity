@@ -10,7 +10,10 @@ double delta = 1;
 int main()
 {
     srand(time(NULL));
-    //vector<vector<double>> lattice = create_lattice(L); 
-    get_variance_R(L);
+    auto start = chrono::high_resolution_clock::now();
+    get_variance_x0(L);
+    auto stop = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<std::chrono::seconds>(stop-start);
+    cout<<"Total duration: "<<duration.count()<<endl;
     return 0;
 }
