@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <vector>
 #include <cmath>
 #include <random>
 #include <time.h> 
@@ -16,15 +15,6 @@ Input-> L=size of lattice
 */
 double* create_lattice(int L)
 {
-    //vector<vector<double>> points;
-    //for (size_t i = 0; i < L*L; i++)
-    //{
-    //    vector<double> coords;
-    //    coords.push_back(i%L);
-    //    coords.push_back(i/L);
-    //    points.push_back(coords);
-    //}
-
     double *points = new double[2*L*L];
     for (size_t i = 0; i < L*L; i++)
     {
@@ -42,8 +32,6 @@ Compute distance between two points on lattice
 */
 double dist(double X_x0, double Y_x0, int iter, double* lattice, int L)
 {
-    //int L = sqrt(sizeof(lattice)/sizeof(lattice[0]));
-
     double X_x = lattice[iter*2];
     double Y_x = lattice[iter*2 + 1];
     double distx, disty;
@@ -80,7 +68,6 @@ sample 10000 x0
 double compute_variance_R(double R, double* lattice, int L)
 {
     double sigma_sq;
-    //int L = sqrt(sizeof(lattice)/sizeof(lattice[0]));
 
     int iterations = 10000;
     int N = 0;
@@ -93,16 +80,13 @@ double compute_variance_R(double R, double* lattice, int L)
         double Y_x0 = ((double) rand() / (RAND_MAX)) * L;
 
         int points_inside = 0;
-        //cout<<"Variance "<<i<<endl;
         for (size_t j = 0; j < L*L; j++)
         {
-            //cout<<"Variance dentro "<<j<<endl;
             if(dist(X_x0, Y_x0, j, lattice, L) < R)
             {
                 points_inside ++;
             }
         }
-        //cout<<"Variance uscito "<<i<<endl;
         N += points_inside;
         N_sq += points_inside*points_inside;
     }
@@ -160,13 +144,8 @@ int* compute_N_r_x0(double X_x0, double Y_x0, double* lattice, double radii[200]
 
 void get_variance_R(int lattice_size)
 {
-    auto start = chrono::high_resolution_clock::now();
-
     double* lattice = create_lattice(lattice_size);
 
-    auto stop = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<std::chrono::microseconds>(stop-start);
-    //cout<<"Create_lattice: "<<duration.count()<<endl;
     double radii[200];
     radii[0] = 0.01;
     radii[199] = lattice_size/2;
@@ -181,13 +160,7 @@ void get_variance_R(int lattice_size)
     for (auto &&i : radii)
     {
         double sigma_sq;
-        auto start = chrono::high_resolution_clock::now();
-        
         sigma_sq = compute_variance_R(i, lattice, lattice_size)/(i*i);
-
-        auto stop = chrono::high_resolution_clock::now();
-        auto duration = chrono::duration_cast<std::chrono::microseconds>(stop-start);
-        //cout<<"compute_variance: "<<duration.count()<<endl;
 
         output<<i<<" "<<sigma_sq<<endl;
     }
@@ -244,12 +217,12 @@ void get_variance_x0(int lattice_size)
 /*
 Add [dx,dy] random displacement to each lattice site
 */
-void AddDisplacement(vector<vector<double>> &lattice, double delta) {
-   int N = lattice.size();
+void AddDisplacement(double* &lattice, double delta, int N) {
    for(int j = 0; j != N-1; j++) {
       double dx = ( (double)rand() )/RAND_MAX  - delta/2;
       double dy = ( (double)rand() )/RAND_MAX  - delta/2;
-      lattice[j] = vector<double>{dx+lattice[j][0],dy+lattice[j][1]};
+      lattice[j*2] = lattice[j*2] + dx;
+      lattice[j*2 + 1] = lattice[j*2 + 1] + dy;
    }
    return;
 }
