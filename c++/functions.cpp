@@ -7,6 +7,7 @@
 #include <string>
 #include <chrono>
 #include <algorithm>
+#include <omp.h>
 
 using namespace std;
 
@@ -76,6 +77,7 @@ double compute_variance_R(double R, vector<vector<double>> lattice)
     int N = 0;
     int N_sq = 0;
 
+    #pragma omp parallel for default(shared)
     for (size_t i = 0; i < iterations; i++)
     {
         double X_x0 = ((double) rand() / (RAND_MAX)) * L;
@@ -95,6 +97,7 @@ double compute_variance_R(double R, vector<vector<double>> lattice)
         N += points_inside;
         N_sq += points_inside*points_inside;
     }
+
     sigma_sq = N_sq/iterations - (N/iterations)*(N/iterations);
     
     return sigma_sq;
@@ -161,7 +164,7 @@ void get_variance_R(int lattice_size)
 
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<std::chrono::microseconds>(stop-start);
-    //cout<<"Create_lattice: "<<duration.count()<<endl;
+    cout<<"Create_lattice: "<<duration.count()<<endl;
     double radii[200];
     radii[0] = 0.01;
     radii[199] = lattice_size/2;
@@ -183,7 +186,7 @@ void get_variance_R(int lattice_size)
 
         auto stop = chrono::high_resolution_clock::now();
         auto duration = chrono::duration_cast<std::chrono::microseconds>(stop-start);
-        //cout<<"compute_variance: "<<duration.count()<<endl;
+        cout<<"compute_variance: "<<duration.count()<<endl;
 
         output<<i<<" "<<sigma_sq<<endl;
     }
