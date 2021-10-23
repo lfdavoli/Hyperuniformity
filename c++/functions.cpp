@@ -168,7 +168,7 @@ void get_variance_R(double* lattice,int lattice_size)
         radii[i] = radii[i-1]*c;
     }
 
-    ofstream output(to_string(lattice_size) + ".csv");
+    ofstream output(to_string(lattice_size) + "delta.csv");
 
     for (auto &&i : radii)
     {
