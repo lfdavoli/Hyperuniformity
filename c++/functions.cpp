@@ -67,32 +67,48 @@ sample 10000 x0
 */
 double compute_variance_R(double R, double* lattice, int L)
 {
-    double sigma_sq;
+    double sigma_sq=0;
+    //int L = sqrt(sizeof(lattice)/sizeof(lattice[0]));
 
     int iterations = 10000;
-    int N = 0;
-    int N_sq = 0;
+    double N[10000] = {0};
+    double N_ = 0;
+    double N_sq_ = 0;
+    double N_sq[10000] = {0};
 
     #pragma omp parallel for default(shared)
     for (size_t i = 0; i < iterations; i++)
     {
         double X_x0 = ((double) rand() / (RAND_MAX)) * L;
         double Y_x0 = ((double) rand() / (RAND_MAX)) * L;
-
+        
         int points_inside = 0;
         for (size_t j = 0; j < L*L; j++)
         {
             if(dist(X_x0, Y_x0, j, lattice, L) < R)
             {
+                //cout<<j<<endl;
                 points_inside ++;
             }
         }
-        N += points_inside;
-        N_sq += points_inside*points_inside;
+        //cout<<"Variance uscito "<<i<<endl;
+        N[i] = ((double) points_inside)/iterations;
+        N_sq[i] = ((double) points_inside)*((double) points_inside)/iterations;
+        //cout << N[i] <<" "<< N_sq[i]<<endl;
     }
 
-    sigma_sq = N_sq/iterations - (N/iterations)*(N/iterations);
-    
+    for (size_t i = 0; i < iterations; i++)
+    {
+        N_ += N[i];
+        N_sq_ += N_sq[i];
+    }
+
+    sigma_sq = N_sq_ - N_*N_;
+
+    if(sigma_sq<0)
+    {
+        cout<<"sigma<0: "<<R<<endl<<" N: "<<N<<endl<<" N_sq: "<<N_sq<<endl;
+    }
     return sigma_sq;
 }
 
@@ -102,7 +118,7 @@ Output-> Variance
 
 Given x0 it computes N(R) and N(R)^2 for all radii
 */
-int* compute_N_r_x0(double X_x0, double Y_x0, double* lattice, double radii[200], int L)
+int* compute_N_r_x0(double X_x0, double Y_x0, double* lattice, double* radii, int L)
 {
     double sigma_sq;
     //int L = sqrt((sizeof(lattice)/sizeof(double))/2);
@@ -135,9 +151,8 @@ int* compute_N_r_x0(double X_x0, double Y_x0, double* lattice, double radii[200]
             }
         }
         //cout<<points_inside<<endl;
-        N_x0[i]= points_inside;
+        N_x0[i] = points_inside;
     }
-    
     return N_x0;
 }
 
@@ -159,21 +174,25 @@ void get_variance_R(int lattice_size)
 
     for (auto &&i : radii)
     {
-        double sigma_sq;
+        double sigma_sq;        
         sigma_sq = compute_variance_R(i, lattice, lattice_size)/(i*i);
-
         output<<i<<" "<<sigma_sq<<endl;
     }
 }
 
 void get_variance_x0(int lattice_size)
 {
+    int N_ITER = 10000;
     double* lattice = create_lattice(lattice_size);
-    int *N_x0;
+    int **N_x0 = new int*[N_ITER];
+    for(int i = 0; i<N_ITER;i++)
+    {
+        N_x0[i] = new int[200];
+    }
+
     double N[200] = {0};
     double N_squared[200] = {0};
     double sigma;
-    int N_ITER = 10000;
     ofstream output(to_string(lattice_size) + ".csv");
 
     double radii[200];
@@ -186,28 +205,22 @@ void get_variance_x0(int lattice_size)
     }
 
     #pragma omp parallel for default(shared)
-
     for (int i = 0; i < N_ITER; i++)
     {
         double X_x0 = ((double) rand() / (RAND_MAX)) * lattice_size;
         double Y_x0 = ((double) rand() / (RAND_MAX)) * lattice_size;
-        N_x0 = compute_N_r_x0(X_x0, Y_x0, lattice, radii, lattice_size);
-        
-        
-        for (size_t j = 0; j < 200; j++)
-        {
-            N[j] = (N[j] + N_x0[j]);
-            N_squared[j] = (N_squared[j] + N_x0[j]*N_x0[j]);   
-        }
-        
+        N_x0[i] = compute_N_r_x0(X_x0, Y_x0, lattice, radii, lattice_size);
     }
-
     
     //cout<<N.size()<<endl;
     for(int i = 0; i<200; i++)
     {
-        //cout<<radii[i]*radii[i]<<endl;
-        sigma = ((N_squared[i]/N_ITER) - (N[i]/N_ITER)*(N[i]/N_ITER))/(radii[i]*radii[i]);
+        for(int j = 0; j<N_ITER; j++)
+        {
+            N[i] += ((double) N_x0[j][i])/N_ITER;
+            N_squared[i] += ((double) N_x0[j][i])*((double) N_x0[j][i])/N_ITER;
+        }
+        sigma = (N_squared[i] - (N[i])*(N[i]))/(radii[i]*radii[i]);
         output<<radii[i]<<" "<<sigma<<endl;
     }
     output.close();
