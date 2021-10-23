@@ -14,16 +14,24 @@ using namespace std;
 /*
 Input-> L=size of lattice
 */
-vector<vector<double>> create_lattice(int L)
+double* create_lattice(int L)
 {
-    vector<vector<double>> points;
-    for (size_t i = 0; i < L*L; i++)
+    //vector<vector<double>> points;
+    //for (size_t i = 0; i < L*L; i++)
+    //{
+    //    vector<double> coords;
+    //    coords.push_back(i%L);
+    //    coords.push_back(i/L);
+    //    points.push_back(coords);
+    //}
+
+    double *points = new double[2*L*L];
+    for (size_t i = 0; i < 2*L*L; i+=2)
     {
-        vector<double> coords;
-        coords.push_back(i%L);
-        coords.push_back(i/L);
-        points.push_back(coords);
+        points[i] = (i/2)%L;
+        points[i+1] = (i/2)/L;
     }
+    
     return points;
 }
 
@@ -31,9 +39,9 @@ vector<vector<double>> create_lattice(int L)
 /*
 Compute distance between two points on lattice
 */
-double dist(double X_x0, double Y_x0, int iter, vector<vector<double>> lattice)
+double dist(double X_x0, double Y_x0, int iter, double* lattice)
 {
-    int L = sqrt(lattice.size());
+    int L = sqrt(sizeof(lattice)/sizeof(lattice[0]));
 
     double X_x = lattice[iter][0];
     double Y_x = lattice[iter][1];
@@ -109,7 +117,7 @@ Output-> Variance
 
 Given x0 it computes N(R) and N(R)^2 for all radii
 */
-int* compute_N_r_x0(double X_x0, double Y_x0, vector<vector<double>> lattice, double radii[200])
+int* compute_N_r_x0(double X_x0, double Y_x0, double* lattice, double radii[200])
 {
     double sigma_sq;
     int L = sqrt(lattice.size());
@@ -185,7 +193,7 @@ void get_variance_R(int lattice_size)
 
 void get_variance_x0(int lattice_size)
 {
-    vector<vector<double>> lattice = create_lattice(lattice_size);
+    double* lattice = create_lattice(lattice_size);
     int *N_x0;
     double N[200] = {0};
     double N_squared[200] = {0};
