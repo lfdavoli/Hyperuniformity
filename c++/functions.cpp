@@ -170,15 +170,8 @@ int* compute_N_r_x0(double X_x0, double Y_x0, double* lattice, double* radii, in
 }
 
 
-void get_variance_R(int lattice_size)
+void get_variance_R(double* lattice,int lattice_size)
 {
-    auto start = chrono::high_resolution_clock::now();
-
-    double* lattice = create_lattice(lattice_size);
-
-    auto stop = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<std::chrono::microseconds>(stop-start);
-    //cout<<"Create_lattice: "<<duration.count()<<endl;
     double radii[200];
     radii[0] = 0.01;
     radii[199] = lattice_size/2;
