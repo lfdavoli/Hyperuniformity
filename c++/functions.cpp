@@ -230,10 +230,23 @@ Add [dx,dy] random displacement to each lattice site
 */
 void AddDisplacement(double* &lattice, double delta, int N) {
    for(int j = 0; j != N-1; j++) {
-      double dx = ( (double)rand() )/RAND_MAX  - delta/2;
-      double dy = ( (double)rand() )/RAND_MAX  - delta/2;
-      lattice[j*2] = lattice[j*2] + dx;
-      lattice[j*2 + 1] = lattice[j*2 + 1] + dy;
+        int L = (int) sqrt(N);
+        double dx = ( (double)rand() )/RAND_MAX  - delta/2;
+        double dy = ( (double)rand() )/RAND_MAX  - delta/2;
+        lattice[j*2] = lattice[j*2] + dx;
+        lattice[j*2 + 1] = lattice[j*2 + 1] + dy;
+        if(lattice[j*2] < 0){
+            lattice[j*2] += L;
+        }
+        else(lattice[j*2] > L){
+            lattice[j*2] -= L;
+        }
+        if(lattice[j*2+1] < 0){
+            lattice[j*2+1] += L;
+        }
+        else(lattice[j*2+1] > L){
+            lattice[j*2+1] -= L;
+        }
    }
    return;
 }
