@@ -33,4 +33,7 @@
 
 # Dataset 
 *.json 
-*.csv
+#*.csv
+
+# Copy 
+function_copy.cpp

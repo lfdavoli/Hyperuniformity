@@ -157,7 +157,7 @@ int* compute_N_r_x0(double X_x0, double Y_x0, double* lattice, double* radii, in
 }
 
 
-void get_variance_R(double* lattice,int lattice_size, string output_file)
+void get_variance_R(double* lattice,int lattice_size)
 {
     double radii[200];
     radii[0] = 0.01;
@@ -168,7 +168,7 @@ void get_variance_R(double* lattice,int lattice_size, string output_file)
         radii[i] = radii[i-1]*c;
     }
 
-    ofstream output(output_file+".csv");
+    ofstream output(to_string(lattice_size) + ".csv");
 
     for (auto &&i : radii)
     {
