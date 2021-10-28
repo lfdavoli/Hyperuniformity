@@ -4,10 +4,10 @@ using namespace std;
 /*
 Parameters
 */
-int L = 200;
-int delta = 2;
-int nsamples = 10000;
-bool optimize = true;
+int L = 200;            // lattice size
+int delta = 2;          // displacement
+int nsamples = 10000;   // samples number
+bool optimize = false;   // enable optimized computation if "true"
 
 int main()
 {
